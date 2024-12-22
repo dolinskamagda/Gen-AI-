@@ -28,11 +28,12 @@ class CustomDocChatbot:
         files = []
         for file in os.listdir("data"):
             if file.endswith(".txt"):
-                with open(os.path.join("data", file)) as f:
-                    docs.append(os.path.join("data", f.read()))
+                with open(os.path.join("data", file), "r", encoding="utf-8") as f:
+                    docs.append(f.read())
                     files.append(file)
 
-        # Split documents and store in vector db
+
+    # Split documents and store in vector db
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200
@@ -48,7 +49,7 @@ class CustomDocChatbot:
         # Define retriever
         retriever = vectordb.as_retriever(
             search_type='mmr',
-            search_kwargs={'k':2, 'fetch_k':11}
+            search_kwargs={'k':1, 'fetch_k':11}
         )
 
         # Setup memory for contextual conversation
@@ -60,14 +61,11 @@ class CustomDocChatbot:
 
         system_message_prompt = SystemMessagePromptTemplate.from_template(
             """
-            You are a chatbot tasked with responding to questions about the Ticos Systems company.
-         
-            You should never answer a question with a question, and you should always respond with the most relevant page from documents.
-         
-            Do not answer questions that are not about the Ticos Systems company.
-         
-            Given a question, you should respond with the most relevant documents page
+            You are a chatbot tasked with responding to questions based on attached files content below.
             {context}
+            
+            Considering text above answer following question. Deepend only on source documents.
+            {question}
             """
         )
 
